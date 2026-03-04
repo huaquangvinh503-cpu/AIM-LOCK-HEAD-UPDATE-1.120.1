@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>APP AIMLOCK HEAD UPDATE V2</title>
+<style>
+  :root{
+    --bg1:#020617;
+    --bg2:#071636;
+    --neon:#08a0ff;
+    --card:#071526;
+    --accent:#1ea7ff;
+    --success:#2ed573;
+    --danger:#ff4757;
+    --white:#eaf6ff;
+  }
+  html,body{height:100%;margin:0;padding:0;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; -webkit-font-smoothing:antialiased;}
+  body{
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(8,160,255,0.06) 0%, transparent 10%),
+      radial-gradient(ellipse at 80% 70%, rgba(30,167,255,0.03) 0%, transparent 8%),
+      linear-gradient(180deg,var(--bg1),var(--bg2));
+    color:var(--white);
+    -webkit-user-select:none; user-select:none; /* prevent text select */
+    -webkit-touch-callout:none;
+    overflow:hidden; /* hide scrollbars to mimic app */
+    display:flex;align-items:center;justify-content:center;padding:18px;
+  }
+
+  /* App container (phone-like card) */
+  .app {
+    width:380px; max-width:96%; height:812px; max-height:96%;
+    border-radius:28px; padding:18px; box-sizing:border-box;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.05));
+    border:1px solid rgba(8,160,255,0.06);
+    box-shadow: 0 12px 40px rgba(2,6,20,0.7);
+    display:flex;flex-direction:column;
+  }
+
+  /* Top badge */
+  .badge {
+    display:flex;gap:12px;align-items:center;
+    background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    padding:10px 12px;border-radius:12px;border:1px solid rgba(30,160,255,0.08);
+    box-shadow:0 6px 24px rgba(8,160,255,0.04);
+  }
+  .icon {width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#6fb7ff,#865dff);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+  .title{font-weight:800;font-size:16px}
+  .subtitle{font-size:11px;opacity:0.9;margin-top:4px;color:rgba(230,245,255,0.95)}
+
+  .content {margin-top:14px;flex:1;overflow:auto;padding-right:6px}
+  /* hide scroll appearance but allow scrolling with touch */
+  .content::-webkit-scrollbar{width:0;height:0}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));padding:12px;border-radius:16px;margin-bottom:12px;border:1px solid rgba(8,160,255,0.06)}
+
+  .card{
+    display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:12px;
+    margin-bottom:10px;border:1px solid rgba(30,160,255,0.08);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
+  }
+  .card-left{display:flex;gap:12px;align-items:center}
+  .weapon{width:46px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .card-title{font-weight:700}
+  .card-sub{font-size:12px;opacity:0.9;margin-top:6px;color:rgba(230,245,255,0.95)}
+
+  /* switch */
+  .switch{width:56px;height:30px;border-radius:999px;background:rgba(255,255,255,0.05);display:flex;align-items:center;padding:4px;cursor:pointer;position:relative;transition:all .18s;border:1px solid rgba(255,255,255,0.03)}
+  .switch.disabled{opacity:0.35;pointer-events:none}
+  .knob{width:22px;height:22px;border-radius:50%;background:#fff;transform:translateX(0);transition:transform .18s}
+  .switch.on{background:linear-gradient(90deg,var(--accent),#6fb7ff);border:1px solid rgba(255,255,255,0.08)}
+  .switch.on .knob{transform:translateX(26px)}
+
+  /* activation row - match screenshot: input + button */
+  .activation{display:flex;gap:12px;align-items:center;margin-top:12px}
+  .input-wrap{flex:1;border-radius:14px;padding:12px;border:2px solid rgba(30,160,255,0.7);background:rgba(0,0,0,0.6)}
+  input[type="password"]{width:100%;border:none;background:transparent;color:var(--white);font-size:16px;outline:none;letter-spacing:6px}
+  .btn{padding:12px 14px;border-radius:12px;background:linear-gradient(180deg,var(--accent),#2f9fe6);border:none;color:white;font-weight:800;cursor:pointer;min-width:88px;text-align:center}
+  .btn.deactivated{background:linear-gradient(180deg,#333,#222)}
+  .btn.activated{background:linear-gradient(180deg,#4caf50,#2e7d32)}
+
+  .message{margin-top:18px;font-size:22px;font-weight:800;text-align:center;padding:12px;border-radius:10px;display:none}
+  .msg-success{color:var(--success);display:block}
+  .msg-fail{color:var(--danger);display:block}
+
+  .footer{font-size:12px;text-align:center;opacity:0.9;margin-top:8px}
+
+  /* small screen adjustments */
+  @media (max-height:700px){
+    .app{height:92vh}
+  }
+</style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Aimbot Menu">
+    <div class="badge" aria-hidden="false">
+      <div class="icon">AIM</div>
+      <div style="flex:1">
+        <div class="title">APP AIM HEAD UPDATE 1.120.1</div>
+        <div class="subtitle">© bản quyền :KTIEN X IOS🍎</div>
+      </div>
+    </div>
+
+    <div class="content" id="content" role="region" aria-live="polite">
+      <div class="panel" id="panel">
+        <!-- cards -->
+        <div class="card">
+          <div class="card-left">
+            <div class="weapon">🔫</div>
+            <div>
+              <div class="card-title">AIM BOT</div>
+              <div class="card-sub">hỗ trợ độ bám tâm 90%</div>
+            </div>
+          </div>
+          <div class="switch disabled" tabindex="0" role="switch" aria-checked="false" data-key="deagle"><div class="knob"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-left">
+            <div class="weapon">🔫</div>
+            <div>
+              <div class="card-title">AIM LOCK</div>
+              <div class="card-sub">hỗ trợ gim định 100%</div>
+            </div>
+          </div>
+          <div class="switch disabled" tabindex="0" role="switch" aria-checked="false" data-key="ump"><div class="knob"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-left">
+            <div class="weapon">🔫</div>
+            <div>
+              <div class="card-title">AIM LOCK HEAD</div>
+              <div class="card-sub">hỗ trợ kéo tâm mới đỏ 100%</div>
+            </div>
+          </div>
+          <div class="switch disabled" tabindex="0" role="switch" aria-checked="false" data-key="m1887"><div class="knob"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-left">
+            <div class="weapon">🔫</div>
+            <div>
+              <div class="card-title">AIM HEAD</div>
+              <div class="card-sub">hỗ trợ bám đầu 100%</div>
+            </div>
+          </div>
+          <div class="switch disabled" tabindex="0" role="switch" aria-checked="false" data-key="mp40"><div class="knob"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-left">
+            <div class="weapon" style="color:#ff4b4b">🎯</div>
+            <div>
+              <div class="card-title">Tâm ảo Aim</div>
+              <div class="card-sub">Hồng tâm hỗ trợ ngắm</div>
+            </div>
+          </div>
+          <div class="switch disabled" tabindex="0" role="switch" aria-checked="false" data-key="aim"><div class="knob"></div></div>
+        </div>
+
+        <!-- activation -->
+        <div class="activation" style="margin-top:6px">
+          <div class="input-wrap" aria-hidden="false"><input id="keyInput" type="password" placeholder="KEY LOGIN..."></div>
+          <button id="activate" class="btn" aria-pressed="false">Kích Hoạt</button>
+        </div>
+
+        <div id="message" class="message" role="status" aria-live="polite"></div>
+
+        <div class="footer">MUA KEY VÀ CÁCH CÀI IB ZALO:078.275.997</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const CORRECT_KEY = 'AIMLOCKHEAD_1.120.1';
+  const input = document.getElementById('keyInput');
+  const btn = document.getElementById('activate');
+  const msg = document.getElementById('message');
+  const switches = Array.from(document.querySelectorAll('.switch'));
+
+  let activated = false;
+
+  function setMessage(text, type){
+    msg.textContent = text;
+    if(type === 'ok'){
+      msg.className = 'message msg-success';
+      msg.style.display = 'block';
+    } else if(type === 'fail'){
+      msg.className = 'message msg-fail';
+      msg.style.display = 'block';
+    } else {
+      msg.style.display = 'none';
+    }
+  }
+
+  function enableSwitches(enable){
+    switches.forEach(sw => {
+      if(enable){
+        sw.classList.remove('disabled');
+        sw.setAttribute('aria-disabled','false');
+      } else {
+        sw.classList.add('disabled');
+        sw.setAttribute('aria-disabled','true');
+        // also turn them off visually
+        sw.classList.remove('on');
+        sw.setAttribute('aria-checked','false');
+      }
+    });
+  }
+
+  // initialize disabled
+  enableSwitches(false);
+
+  // Toggle behavior for switches
+  switches.forEach(sw => {
+    sw.addEventListener('click', function(){
+      // only allow toggling if activated
+      if(!activated) return;
+      const on = sw.classList.toggle('on');
+      sw.setAttribute('aria-checked', on ? 'true' : 'false');
+      // Here you can send messages to native layer if needed (postMessage, custom URL, etc.)
+      console.log('switch', sw.dataset.key, 'state=', on);
+    });
+    // keyboard accessibility
+    sw.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        sw.click();
+      }
+    });
+  });
+
+  // Activation logic: single click toggles activation if key correct; if not correct show error.
+  btn.addEventListener('click', function(){
+    const val = input.value.trim();
+
+    if(!activated){
+      // try to activate
+      if(!val){
+        setMessage('Vui lòng nhập key để kích hoạt', 'fail');
+        return;
+      }
+      if(val === CORRECT_KEY){
+        activated = true;
+        setMessage('Thông báo: Kích hoạt thành công!', 'ok');
+        btn.classList.add('activated'); btn.classList.remove('deactivated');
+        btn.textContent = 'Đã Kích Hoạt';
+        btn.setAttribute('aria-pressed','true');
+        enableSwitches(true);
+      } else {
+        setMessage('Key không hợp lệ', 'fail');
+        btn.classList.remove('activated'); btn.classList.add('deactivated');
+        btn.textContent = 'Kích Hoạt';
+        btn.setAttribute('aria-pressed','false');
+        enableSwitches(false);
+      }
+    } else {
+      // deactivate (toggle off)
+      activated = false;
+      setMessage('Đã hủy kích hoạt', ''); // hide color class
+      btn.classList.remove('activated'); btn.classList.add('deactivated');
+      btn.textContent = 'Kích Hoạt';
+      btn.setAttribute('aria-pressed','false');
+      enableSwitches(false);
+    }
+  });
+
+  // Enter key triggers activation
+  input.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ btn.click(); }
+  });
+
+  // Prevent long-press selection and default mobile behaviors
+  document.addEventListener('touchstart', function() {}, {passive:true});
+</script>
+</body>
+</html>
